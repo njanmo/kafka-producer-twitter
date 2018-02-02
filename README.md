@@ -50,7 +50,7 @@ Kafka Client port is configured to Hortonworks Ambari default:
 client = KafkaClient("localhost:6667")
 ```
 
-if utilising a standalone Kafka instance replace with:
+If utilising a standalone Kafka instance replace with:
 
 ```
 client = KafkaClient("localhost:9092")
