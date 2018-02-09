@@ -4,66 +4,62 @@
 Created on Mon Oct 09 09:35:34 2017
 
 @author: NayJay
+
 """
 
 from __future__ import print_function
 import json
-from kafka import SimpleProducer, KafkaClient
+from kafka import KafkaProducer, KafkaClient
 import tweepy
 import configparser
 
-# Note: Some of the imports are external python libraries. They are installed on the current machine.
-# If you are running multinode cluster, you have to make sure that these libraries
-# and currect version of Python is installed on all nodes.
+# Read the credententials from 'twitter-app-credentials.txt' file
+# config = configparser.ConfigParser()
+# config.read('twitter-app-credentials.txt')
+consumer_key = 'ENTER YOUR CONSUMER KEY HERE'
+consumer_secret = 'ENTER YOUR CONSUMER SECRET HERE'
+access_key = 'ENTER YOUR ACCESS TOKEN KEY HERE'
+access_secret = 'ENTER YOUR ACCESS TOKEN SECRET HERE'
 
-class TweeterStreamListener(tweepy.StreamListener):
-    """ A class to read the twitter stream and push it to Kafka"""
+# Words to track
+WORDS = ['bitcoin', 'Bitcoin', '#Bitcoin', '#bitcoin', 'BTC', '#BTC', 'btc', '#btc']
 
-    def __init__(self, api):
-        self.api = api
-        super(tweepy.StreamListener, self).__init__()
-        client = KafkaClient("localhost:6667")
-        self.producer = SimpleProducer(client, async = True,
-                          batch_send_every_n = 1000,
-                          batch_send_every_t = 10)
 
-    def on_status(self, status):
+class StreamListener(tweepy.StreamListener):
+    # This is a class provided by tweepy to access the Twitter Streaming API.
+
+    def on_connect(self):
+        # Called initially to connect to the Streaming API
+        print("You are now connected to the streaming API.")
+
+    def on_error(self, status_code):
+        # On error - if an error occurs, display the error / status code
+        print("Error received in kafka producer " + repr(status_code))
+        return True # Don't kill the stream
+
+    def on_data(self, data):
         """ This method is called whenever new data arrives from live stream.
         We asynchronously push this data to kafka queue"""
-        msg =  status.text.encode('utf-8')
-        #print(msg)
         try:
-            self.producer.send_messages(b'btc_twitter_stream', msg)
+            producer.send('btc_twitter_stream', data.encode('utf-8'))
         except Exception as e:
             print(e)
             return False
         return True
 
-    def on_error(self, status_code):
-        print("Error received in kafka producer")
-        return True # Don't kill the stream
-
     def on_timeout(self):
         return True # Don't kill the stream
 
-if __name__ == '__main__':
+# Kafka Configuration
+producer = KafkaProducer(bootstrap_servers=['sandbox.hortonworks.com:6667'])
 
-    # Read the credententials from 'twitter-app-credentials.txt' file
-    config = configparser.ConfigParser()
-    config.read('twitter-app-credentials.txt')
-    consumer_key = config['DEFAULT']['consumerKey']
-    consumer_secret = config['DEFAULT']['consumerSecret']
-    access_key = config['DEFAULT']['accessToken']
-    access_secret = config['DEFAULT']['accessTokenSecret']
+# Create Auth object
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_key, access_secret)
+api = tweepy.API(auth)
 
-
-    # Create Auth object
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_key, access_secret)
-    api = tweepy.API(auth)
-
-    # Create stream and bind the listener to it
-    stream = tweepy.Stream(auth, listener = TweeterStreamListener(api))
-
-    #Custom Filter rules pull all traffic for those filters in real time.
-    stream.filter(track = ['bitcoin', 'Bitcoin', '#Bitcoin', '#bitcoin', 'BTC', '#BTC', 'btc', '#btc'], languages = ['en'])
+# Set up the listener. The 'wait_on_rate_limit=True' is needed to help with Twitter API rate limiting.
+listener = StreamListener(api=tweepy.API(wait_on_rate_limit=True, wait_on_rate_limit_notify=True, timeout=60, retry_delay=5, retry_count=10, retry_errors=set([401, 404, 500, 503])))
+stream = tweepy.Stream(auth=auth, listener=listener)
+print("Tracking: " + str(WORDS))
+stream.filter(track=WORDS, languages = ['en'])
