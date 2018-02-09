@@ -51,7 +51,7 @@ class StreamListener(tweepy.StreamListener):
         return True # Don't kill the stream
 
 # Kafka Configuration
-producer = KafkaProducer(bootstrap_servers=['sandbox.hortonworks.com:6667'])
+producer = KafkaProducer(bootstrap_servers=['localhost:6667'])
 
 # Create Auth object
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
