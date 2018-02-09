@@ -49,11 +49,11 @@ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic btc_twitter_str
 Kafka Client port is configured to Hortonworks Ambari default:
 
 ```
-client = KafkaClient("localhost:6667")
+producer = KafkaProducer(bootstrap_servers=['localhost:6667'])
 ```
 
 If utilising a standalone Kafka instance replace with:
 
 ```
-client = KafkaClient("localhost:9092")
+producer = KafkaProducer(bootstrap_servers=['localhost:9092'])
 ```
