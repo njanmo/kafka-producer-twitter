@@ -11,11 +11,8 @@ from __future__ import print_function
 import json
 from kafka import KafkaProducer, KafkaClient
 import tweepy
-import configparser
 
-# Read the credententials from 'twitter-app-credentials.txt' file
-# config = configparser.ConfigParser()
-# config.read('twitter-app-credentials.txt')
+# Twitter Credentials Obtained from http://dev.twitter.com
 consumer_key = 'ENTER YOUR CONSUMER KEY HERE'
 consumer_secret = 'ENTER YOUR CONSUMER SECRET HERE'
 access_key = 'ENTER YOUR ACCESS TOKEN KEY HERE'
@@ -23,7 +20,6 @@ access_secret = 'ENTER YOUR ACCESS TOKEN SECRET HERE'
 
 # Words to track
 WORDS = ['bitcoin', 'Bitcoin', '#Bitcoin', '#bitcoin', 'BTC', '#BTC', 'btc', '#btc']
-
 
 class StreamListener(tweepy.StreamListener):
     # This is a class provided by tweepy to access the Twitter Streaming API.
@@ -45,7 +41,7 @@ class StreamListener(tweepy.StreamListener):
         except Exception as e:
             print(e)
             return False
-        return True
+        return True # Don't kill the stream
 
     def on_timeout(self):
         return True # Don't kill the stream
