@@ -4,6 +4,10 @@
 
 A simple example of a Kafka Producer designed to populate a Kafka Topic (btc_twitter_stream) with tweets about Bitcoin.
 
+### Script Prep
+
+First obtain a set of twitter API keys from [here](http://dev.twitter.com) and place them in the twitter credentials section of the script.
+
 ### Environment Prep
 
 First install a python3 environment and pip on all nodes in the cluster that will be running this script
