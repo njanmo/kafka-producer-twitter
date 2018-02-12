@@ -10,7 +10,7 @@ First obtain a set of twitter API keys from [here](http://dev.twitter.com) and p
 
 ### Environment Prep
 
-First install a python3 environment and pip on all nodes in the cluster that will be running this script
+Make sure to install a python3 environment and pip on all nodes in the cluster that will be running this script
 
 Find instructions on how to do this on centOS [here](https://njanmo.github.io/useful/2018/02/08/hdp-sandbox.html#3)
 
